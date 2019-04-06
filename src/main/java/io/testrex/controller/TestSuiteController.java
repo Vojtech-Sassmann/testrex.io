@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +26,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/projects/{projectId}/testsuites")
-public class TestSuiteController {
+public class TestSuiteController implements TestSuiteControllerInterface {
+
   private final TestSuiteRepository testSuiteRepository;
   private final ProjectRepository projectRepository;
 
@@ -53,8 +55,9 @@ public class TestSuiteController {
   }
 
   @PostMapping(consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+  @PreAuthorize("hasAnyAuthority('ROLE_USER')")
   public ResponseEntity<TestSuite> create(@RequestBody TestSuite testSuite, @PathVariable Long projectId) {
-    LOG.info("Creating TestSuite: ", testSuite.toString());
+    LOG.info("Creating TestSuite: {}", testSuite.toString());
     Project pr = projectRepository.findById(projectId).get();
     if (pr != null) {
         testSuite.setProject(pr);
